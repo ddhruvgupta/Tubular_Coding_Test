@@ -1,3 +1,4 @@
+import json, sys
 from collections import defaultdict
 
 
@@ -7,7 +8,7 @@ class node:
     visited = False
 
     def __init__(self, val):
-        self.value = val
+        self.value = val.upper()
 
     def add(self, n):
         self.neighbours.append(n)
@@ -30,11 +31,18 @@ def neighbors(a, r, c):
 
 
 def main():
-    gameBoard = [
-        ["C", "G", "C"],
-        ["N", "I", "D"],
-        ["A", "Z", "N"]
-    ]
+    a = sys.stdin
+    inp = json.load(a)
+
+    # gameBoard = [
+    #	 ["C", "G", "C"],
+    #	 ["N", "I", "D"],
+    #	 ["A", "Z", "N"]
+    # ]
+
+    gameBoard = inp["gameBoard"]
+    wordList = inp["wordList"]
+
     g = list()
     start = defaultdict(list)
 
@@ -47,9 +55,28 @@ def main():
             count += 1
 
     # found = checkWord(start, g, "RAG")
-    print(checkWord(start, g, "NID"))
-    reset(g)
-    print(checkWord(start, g, "CNAZAN"))
+    # print(checkWord(start, g, "NID"))
+    # reset(g)
+    # print(checkWord(start, g, "CNAZAN"))
+
+    solution = list()
+    for ea in wordList:
+        if checkWord(start, g, ea.upper()):
+            solution.append(ea)
+        reset(g)
+
+    try:
+        for ea in solution:
+            print(ea, flush=True)
+
+        print(
+            maxScore(solution, inp["letterPoints"], inp["wordFindTime"], inp["letterIdentifyTime"], inp["maxGameTime"]),
+            flush=True)
+
+    except (BrokenPipeError, IOError):
+        print('BrokenPipeError caught', file=sys.stderr)
+
+    sys.stderr.close()
 
 
 def checkWord(start, g, word):
@@ -89,6 +116,32 @@ def DFS(start, g, word, pos):
 def reset(g):
     for ea in g:
         ea.reset()
+
+
+def maxScore(solution, letterPoints, wordFindTime, letterIdentifyTime, maxGameTime):
+    points = list()
+    temp = dict()
+
+    for word in solution:
+        p = sum(list(map(lambda x: letterPoints.get(x, 1), word)))
+        t = wordFindTime + letterIdentifyTime * (len(word) - 1)
+        points.append(p)
+        temp.update({word: {"points": p, "time": t}})
+
+    out = [x for _, x in sorted(zip(points, solution), reverse=True)]
+
+    points_sum = 0
+    time_sum = 0
+
+    # print(out)
+
+    for word in out:
+        t = temp[word]["time"]
+        time_sum = time_sum + t
+        if time_sum <= maxGameTime:
+            points_sum = points_sum + temp[word]["points"]
+        else:
+            return points_sum
 
 
 if __name__ == '__main__':

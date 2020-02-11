@@ -1,0 +1,8 @@
+import numpy as np
+k = 65 + np.random.random ([3,4]) * (90-65)
+k = k.asype(int)
+new_k = k.tolist()
+
+for i in range(0,len(new_k)):
+    for j in range(0,len(new_k[i])):
+            new_k[i][j] = chr(new_k[i][j])
