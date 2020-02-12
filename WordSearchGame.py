@@ -24,6 +24,9 @@ corresonding node in the list of graph nodes.
 
 - For the maximum points possible in a single round of the game, an implementation of the knapsack problem's solution using dynamic programming is applied. 
 
+How to run:
+“cat input.json | python WordSearchGame.py | diff answer.txt -”.
+
 """
 
 import json, sys
@@ -62,8 +65,15 @@ def neighbors(a, r, c):
 
 
 def main():
+    print("Starting up and accepting json inputs: \n")
+    print("usage: cat input.json | python WordSearchGame.py | diff answer.txt -")
     a = sys.stdin
-    inp = json.load(a)
+    try:
+        inp = json.load(a)
+    except ValueError as e:
+        print("Input not in json format")
+        exit(1)
+
     gameBoard = inp["gameBoard"]
     wordList = inp["wordList"]
 
