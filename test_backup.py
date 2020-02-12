@@ -1,41 +1,13 @@
-"""
-@Author Dhruv Gupta
-@Description
-This script takes in an input json file which consists of a 2d matrix of charecters, a list of words to search for in the 2d matrix, a 
-
-
-Input: Json File with structure as defined in input.json. input.json is a test file
-- wordList: a list of words to search for in the @D char array
-- gameBoard: 2D array of chars
-- WordfindTime: Time to find first charecter 
-- LetterFindTime: Time to find each proceeding charecter
-
-Output: which words are present in the 2D matrix of chars. followed by max number of points possible.
-
-
-Solution:
-- Convert each element of 2d array into an object of class node. each node needs the value of the element of the 2d array and the neighbors. 
-The neighbors list is represented as a list of indices when the arrary is unrolleded. these index values will then correspond to the the index of the 
-corresonding node in the list of graph nodes. 
-
-- BFS/DFS is used for graph traversal to check if the word is present. This is similiar to the application of a topological sorting algorithm 
-
-- For the maximum points possible in a single round of the game, an implementation of the knapsack problem's solution using dynamic programming is applied. 
-
-"""
-
 import json, sys
 from collections import defaultdict
 
 
 class node:
-    """Class represents graph nodes"""
     value = ""
     neighbours = []
     visited = False
 
     def __init__(self, val):
-        """constructor will populate only the value of the node"""
         self.value = val.upper()
 
     def add(self, n):
@@ -49,7 +21,6 @@ class node:
 
 
 def neighbors(a, r, c):
-    """neighbors is a list of index of values where the index value is used a a reference to the location in a list of nodes"""
     out = list()
     for i in range(r - 1, r + 2):
         for j in range(c - 1, c + 2):
@@ -60,13 +31,24 @@ def neighbors(a, r, c):
 
 
 def main():
-    a = sys.stdin
-    inp = json.load(a)
-    gameBoard = inp["gameBoard"]
-    wordList = inp["wordList"]
+    # a = sys.stdin
+    # inp = json.load(a)
 
+    gameBoard = [
+    	 ["C", "G", "C"],
+    	 ["N", "I", "D"],
+    	 ["A", "Z", "N"]
+    ]
 
-    g = list() # this list is representation of all the nodes of a graph. 
+    wordList = [
+"air", "car", "card", "cards",
+"drag", "drags", "sad", "sadden",
+"Sin", "snail", "zig"
+]
+    # gameBoard = inp["gameBoard"]
+    # wordList = inp["wordList"]
+
+    g = list()
     start = defaultdict(list)
 
     count = 0
@@ -77,6 +59,10 @@ def main():
             start[gameBoard[i][j]].append(count)
             count += 1
 
+    # found = checkWord(start, g, "RAG")
+    # print(checkWord(start, g, "NID"))
+    # reset(g)
+    # print(checkWord(start, g, "CNAZAN"))
 
     solution = list()
     for ea in wordList:
@@ -88,8 +74,9 @@ def main():
         for ea in solution:
             print(ea, flush=True)
 
-        print(maxScore(solution, inp["letterPoints"], inp["wordFindTime"], inp["letterIdentifyTime"], inp["maxGameTime"]))
-        # print(maxScore(solution, letterPoints, 15, 2, 55),flush=True)
+        print(
+            maxScore(solution, inp["letterPoints"], inp["wordFindTime"], inp["letterIdentifyTime"], inp["maxGameTime"]),
+            flush=True)
 
     except (BrokenPipeError, IOError):
         print('BrokenPipeError caught', file=sys.stderr)
@@ -98,10 +85,6 @@ def main():
 
 
 def checkWord(start, g, word):
-    """
-    Check dictionary of charecter positions to find where the string might start in the graph. 
-    If the charecter is found, BFS will start from that point.
-    """
     s = start.get(word[0], -1)
     if s == -1:
         return False
@@ -110,14 +93,13 @@ def checkWord(start, g, word):
         return True
 
     for ea in s:
-        soln = BFS(ea, g, word, 1)
+        soln = DFS(ea, g, word, 1)
         if soln:
             return True
     return False
 
 
-def BFS(start, g, word, pos):
-    """Application of Breath First Search to look for the next best fitting word"""
+def DFS(start, g, word, pos):
     if not g[start].visited:
         g[start].visit()
     else:
@@ -131,7 +113,7 @@ def BFS(start, g, word, pos):
                 return True
             else:
                 pos += 1
-                return BFS(ea, g, word, pos)
+                return DFS(ea, g, word, pos)
 
     return False
 
@@ -142,7 +124,6 @@ def reset(g):
 
 
 def maxScore(solution, letterPoints, wordFindTime, letterIdentifyTime, maxGameTime):
-    """Method to find the score of each word based on input points dictionary and time scheme provided in the input"""
     points = list()
     temp = dict()
 
@@ -162,9 +143,35 @@ def maxScore(solution, letterPoints, wordFindTime, letterIdentifyTime, maxGameTi
     points_sum = 0
     time_sum = 0
 
+    #print(out)
 
-    def knapSack(W, wt, val, n):
-        """Knapsack Algorithm application to find the maximum number of points that can be scored in the given configuration"""
+    """for word in out:
+        #print(word)
+
+        t = temp[word]["time"]
+        print(word, t, temp[word]["points"])
+        time_sum = time_sum + t
+        if time_sum <= maxGameTime:
+            points_sum = points_sum + temp[word]["points"]
+        else:
+            return points_sum
+
+    for word in out:
+
+    x = temp[word]["time"]
+    y = temp[word]["points"]
+    time_sum += x
+    points_sum += temp[word]["points"]
+
+    if time_sum > maxGameTime:
+        time_sum -= x
+        return points_sum-y"""
+
+    #for i in range(n-1,-1,-1):
+
+    print(temp)
+
+    def knapSack(W, wt, val, n): 
         K = [[0 for x in range(W + 1)] for x in range(n + 1)] 
   
         # Build table K[][] in bottom up manner 
@@ -180,7 +187,12 @@ def maxScore(solution, letterPoints, wordFindTime, letterIdentifyTime, maxGameTi
         return K[n][W]
 
     maxS = knapSack(maxGameTime,temp_time,temp_points,len(temp_points))
-    print(maxS)
+    print("maxs",maxS)
+
+
+
+
+
 
 if __name__ == '__main__':
     main()
